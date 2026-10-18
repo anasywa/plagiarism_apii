@@ -3,15 +3,13 @@ import io
 import re
 import docx
 import difflib
-import fitz  
-import Levenshtein
+import pymupdf as fitz
 from PIL import Image
 import pytesseract
-from PyPDF2 import PdfReader
-from flask import Flask, render_template, request, redirect, url_for, flash, make_response, session, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory, jsonify
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colorspip freeze > requirements.txtpython -m pip freeze > requirements.txt
+from reportlab.lib import colors
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from reportlab.lib.pagesizes import A4

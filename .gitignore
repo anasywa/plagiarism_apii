@@ -20,4 +20,7 @@ uploads/*
 !uploads/.gitkeep
 
 # Generated files
+hasil_plagiarisme.pdf.vscode/
+
+.vscode/
 hasil_plagiarisme.pdf
