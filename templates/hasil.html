@@ -3,269 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hasil Analisis</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Hasil Analisis | Professional Light Edition</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        .loading-container {
-            min-height: 400px;
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --info: #0ea5e9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- Animasi Partikel Daun --- */
+        #leaf-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .leaf {
+            position: absolute;
+            background-color: rgba(79, 70, 229, 0.1);
+            clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
+            animation: fly-right linear infinite;
+        }
+
+        @keyframes fly-right {
+            0% { transform: translate(-10vw, -10vh) rotate(0deg); opacity: 0; }
+            15% { opacity: 0.4; }
+            85% { opacity: 0.4; }
+            100% { transform: translate(110vw, 110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* --- Animasi Masuk & Keluar --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOutDown {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(30px); }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .animate-out {
+            animation: fadeOutDown 0.5s cubic-bezier(0.7, 0, 0.84, 0) forwards !important;
+        }
+
+        .delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .delay-2 { animation-delay: 0.2s; opacity: 0; }
+
+        /* Navbar */
+        .navbar-custom {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--text-main) !important;
             display: flex;
             align-items: center;
+            gap: 12px;
+        }
+
+        /* Card Styles */
+        .results-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 10;
+        }
+
+        .loading-container {
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
+            text-align: center;
         }
-        .loading-spinner {
-            width: 3rem;
-            height: 3rem;
+
+        /* Modern Table */
+        .table {
+            margin-top: 1.5rem;
+            border-collapse: separate;
+            border-spacing: 0 8px;
         }
-        .progress-container {
-            max-width: 500px;
-            margin: 0 auto;
+
+        .table thead th {
+            background-color: #f1f5f9;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            padding: 12px 20px;
         }
-        .fade-in {
-            opacity: 0;
-            animation: fadeInAnimation 0.5s forwards;
+
+        .table tbody tr {
+            background-color: #fff;
+            transition: transform 0.2s ease;
         }
-        @keyframes fadeInAnimation {
-            to { opacity: 1; }
+
+        .table tbody td {
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-style: solid none;
+            vertical-align: middle;
         }
-        
-        /* Mobile-specific improvements */
+
+        .table tbody td:first-child {
+            border-left-style: solid;
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .table tbody td:last-child {
+            border-right-style: solid;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .badge-score {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Progress Bar Modern */
+        .progress {
+            height: 12px;
+            border-radius: 100px;
+            background-color: #e2e8f0;
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary), var(--info));
+            transition: width 0.4s ease;
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            border-radius: 14px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-secondary-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-secondary-outline:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+            border-color: var(--text-main);
+        }
+
+        .btn-success-solid {
+            background-color: var(--success);
+            color: white;
+            border: none;
+        }
+
+        .btn-success-solid:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+
         @media (max-width: 768px) {
-            .table-responsive-mobile {
-                font-size: 0.875rem;
-            }
-            
-            .btn-group-mobile {
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .btn-group-mobile .btn {
-                width: 100%;
-            }
-            
-            .loading-container {
-                min-height: 300px;
-                padding: 1rem;
-            }
-            
-            .loading-spinner {
-                width: 2rem;
-                height: 2rem;
-            }
+            .results-card { padding: 1.5rem; }
+            .btn-action { width: 100%; justify-content: center; }
         }
     </style>
 </head>
-<body class="bg-light">
-    <div class="container mt-3 mt-md-5">
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        
+<body>
+
+    <div id="leaf-container"></div>
+
+    <nav class="navbar navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i data-lucide="layers" class="text-primary"></i>
+                <span>PLAGIAT</span>
+            </a>
+        </div>
+    </nav>
+
+    <main id="mainContent" class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-12 col-lg-10">
-                <div class="card shadow p-3 p-md-4">
-                    <h2 class="mb-4 text-center">📊 Hasil Analisis Plagiarisme</h2>
-                    
-                    <!-- Loading State -->
+            <div class="col-12 col-lg-9 col-xl-8">
+                
+               
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show mb-4 animate-in" role="alert" style="border-radius: 16px; border:none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <div class="d-flex align-items-center">
+                            <i data-lucide="bell" class="me-2" style="width: 18px;"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
+                <div class="results-card animate-in delay-1">
+                    <div class="text-center mb-4">
+                        <div class="mx-auto mb-3" style="width: 60px; height: 60px; background: rgba(79, 70, 229, 0.1); border-radius: 18px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <i data-lucide="bar-chart-3" style="width: 30px; height: 30px;"></i>
+                        </div>
+                        <h3 class="fw-bold m-0">Hasil Analisis Plagiarisme</h3>
+                        <p class="text-muted small mt-1">Laporan perbandingan tingkat kemiripan dokumen</p>
+                    </div>
+
+                    <!-- Loading State (Tampil jika data hasil belum ada) -->
                     <div id="loading-state" class="loading-container" {% if hasil %}style="display: none;"{% endif %}>
-                        <div class="text-center">
-                            <div class="spinner-border text-primary loading-spinner mb-3" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <h4>Sedang Menganalisis Dokumen...</h4>
-                            <p class="text-muted">Mohon tunggu, proses analisis sedang berlangsung</p>
-                            
-                            <!-- Progress Bar -->
-                            <div class="progress-container mt-4">
-                                <div class="progress mb-2">
-                                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <small id="progress-text" class="text-muted">Memulai proses...</small>
-                            </div>
+                        <div class="spinner-border text-primary mb-4" style="width: 3rem; height: 3rem; border-width: 0.25rem;" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Menganalisis Dokumen...</h5>
+                        <p id="progress-text" class="text-muted small">Memulai proses analisis sistem</p>
+                        
+                        <div class="progress">
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                         </div>
                     </div>
 
-                    <!-- Results State -->
-                    <div id="results-state" class="fade-in" {% if not hasil %}style="display: none;"{% endif %}>
+                    <!-- Results State (Tampil jika data hasil sudah ada) -->
+                    <div id="results-state" class="animate-in delay-2" {% if not hasil %}style="display: none;"{% endif %}>
                         {% if hasil %}
-                        <div class="table-responsive table-responsive-mobile">
-                            <table class="table table-bordered text-center">
-                                <thead class="table-dark">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
                                     <tr>
-                                        <th>Algoritma</th>
-                                        <th>Skor (%)</th>
+                                        <th>Metode / Algoritma</th>
+                                        <th class="text-center">Skor Kemiripan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td>Levenshtein Distance</td>
-                                        <td><span class="badge bg-info">{{ hasil.levenshtein }}</span></td>
+                                        <td class="text-center">
+                                            <span class="badge-score bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                                                {{ hasil.levenshtein }}%
+                                            </span>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>Content Based Filtering (TF-IDF Cosine)</td>
-                                        <td><span class="badge bg-info">{{ hasil.cbf }}</span></td>
+                                        <td class="text-center">
+                                            <span class="badge-score bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                                                {{ hasil.cbf }}%
+                                            </span>
+                                        </td>
                                     </tr>
-                                    <tr class="table-success">
-                                        <td><strong>Kombinasi (Final)</strong></td>
-                                        <td><span class="badge bg-success fs-6">{{ hasil.final }}</span></td>
+                                    <tr style="background-color: #f0fdf4;">
+                                        <td style="border-left-color: var(--success); border-left-width: 4px;">
+                                            <strong>Skor Akhir (Kombinasi)</strong>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge-score bg-success text-white">
+                                                {{ hasil.final }}%
+                                            </span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        
-                        <div class="text-center mt-4">
-                            <div class="btn-group-mobile d-md-flex justify-content-md-center gap-md-3">
-                                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-lg">
-                                    <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
-                                </a>
-                                <a href="{{ url_for('download_pdf') }}" 
-                                   class="btn btn-success btn-lg">
-                                    <i class="bi bi-download"></i> Download PDF Report
-                                </a>
-                            </div>
+
+                        <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-5">
+                            <a href="{{ url_for('dashboard') }}" id="backBtn" class="btn-action btn-secondary-outline">
+                                <i data-lucide="arrow-left" style="width: 18px;"></i>
+                                <span>Kembali ke Dashboard</span>
+                            </a>
+                            <a href="{{ url_for('download_pdf') }}" class="btn-action btn-success-solid">
+                                <i data-lucide="download" style="width: 18px;"></i>
+                                <span>Download PDF Report</span>
+                            </a>
                         </div>
                         {% endif %}
                     </div>
                 </div>
+
+                <p class="text-center mt-5 text-muted small">
+                    &copy; 2026 UIN ALAUDDIN MAKASSAR • 
+                </p>
             </div>
         </div>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Check if we need to process files (only if no results are shown yet)
-        {% if not hasil %}
-        document.addEventListener('DOMContentLoaded', function() {
-            processAnalysis();
-        });
-        {% endif %}
+    </main>
 
-        function processAnalysis() {
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        lucide.createIcons();
+
+        // --- Partikel Daun ---
+        const leafContainer = document.getElementById('leaf-container');
+        const leafCount = 15;
+        for (let i = 0; i < leafCount; i++) {
+            const leaf = document.createElement('div');
+            leaf.className = 'leaf';
+            const startY = Math.random() * 100;
+            const duration = 12 + Math.random() * 18;
+            const delay = Math.random() * 20;
+            const size = 10 + Math.random() * 15;
+            leaf.style.left = `-5vw`;
+            leaf.style.top = `${startY}vh`;
+            leaf.style.width = `${size}px`;
+            leaf.style.height = `${size * 1.3}px`;
+            leaf.style.animationDuration = `${duration}s`;
+            leaf.style.animationDelay = `-${delay}s`;
+            leafContainer.appendChild(leaf);
+        }
+
+        // --- Simulasi Progress & Fetch ---
+        // Perbaikan: Pengecekan dilakukan secara langsung melalui DOM untuk menghindari SyntaxError dari Jinja2 di dalam JS
+        const loadingEl = document.getElementById('loading-state');
+        if (loadingEl && loadingEl.style.display !== 'none') {
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
-            
-            // Simulate progress updates
-            let progress = 0;
-            const progressMessages = [
-                'Membaca dokumen...',
-                'Membersihkan teks...',
-                'Menjalankan algoritma Levenshtein...',
-                'Menjalankan algoritma CBF...',
-                'Menghasilkan laporan PDF...',
-                'Finalisasi hasil...'
+            const messages = [
+                'Membaca dokumen PDF...',
+                'Membersihkan karakter teks...',
+                'Menghitung Levenshtein Distance...',
+                'Vektorisasi TF-IDF...',
+                'Menghitung Cosine Similarity...',
+                'Finalisasi laporan...'
             ];
-            
-            const progressInterval = setInterval(() => {
-                progress += Math.random() * 20;
-                if (progress > 90) progress = 90;
-                
-                progressBar.style.width = progress + '%';
-                progressBar.setAttribute('aria-valuenow', progress);
-                
-                const messageIndex = Math.floor((progress / 100) * progressMessages.length);
-                if (messageIndex < progressMessages.length) {
-                    progressText.textContent = progressMessages[messageIndex];
-                }
-            }, 800);
 
-            // Make the actual API call
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 92) progress = 92;
+                if (progressBar) progressBar.style.width = progress + '%';
+                
+                const idx = Math.floor((progress / 100) * messages.length);
+                if (progressText && messages[idx]) progressText.innerText = messages[idx];
+            }, 700);
+
             fetch('/hasil', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({})
             })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error('Analysis failed');
-            })
+            .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
-                clearInterval(progressInterval);
-                
-                // Complete progress
-                progressBar.style.width = '100%';
-                progressText.textContent = 'Analisis selesai!';
-                
-                setTimeout(() => {
-                    displayResults(data);
-                }, 500);
+                clearInterval(interval);
+                if (progressBar) progressBar.style.width = '100%';
+                if (progressText) progressText.innerText = 'Analisis Selesai!';
+                setTimeout(() => renderResults(data), 600);
             })
-            .catch(error => {
-                clearInterval(progressInterval);
-                console.error('Error:', error);
-                
-                // Show error state
-                document.getElementById('loading-state').innerHTML = `
-                    <div class="text-center">
-                        <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
-                        <h4 class="mt-3 text-danger">Terjadi Kesalahan</h4>
-                        <p class="text-muted">Gagal memproses analisis. Silakan coba lagi.</p>
-                        <a href="${window.location.origin}/upload" class="btn btn-primary mt-3">
-                            <i class="bi bi-arrow-left"></i> Kembali ke Upload
-                        </a>
-                    </div>
-                `;
+            .catch(() => {
+                clearInterval(interval);
+                if (loadingEl) {
+                    loadingEl.innerHTML = `
+                        <div class="text-center py-4">
+                            <i data-lucide="alert-triangle" class="text-danger mb-3" style="width: 48px; height: 48px;"></i>
+                            <h5 class="fw-bold text-danger">Gagal Menganalisis</h5>
+                            <p class="text-muted small">Terjadi kesalahan pada server saat memproses dokumen.</p>
+                            <a href="/upload" class="btn btn-sm btn-outline-primary mt-2">Coba Upload Lagi</a>
+                        </div>
+                    `;
+                }
+                lucide.createIcons();
             });
         }
 
-        function displayResults(data) {
-            // Hide loading state
-            document.getElementById('loading-state').style.display = 'none';
+        function renderResults(data) {
+            const loadingEl = document.getElementById('loading-state');
+            if (loadingEl) loadingEl.style.display = 'none';
             
-            // Show results
-            const resultsHtml = `
-                <table class="table table-bordered text-center">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Algoritma</th>
-                            <th>Skor (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Levenshtein Distance</td>
-                            <td>${data.levenshtein}</td>
-                        </tr>
-                        <tr>
-                            <td>Content Based Filtering (TF-IDF Cosine)</td>
-                            <td>${data.cbf}</td>
-                        </tr>
-                        <tr class="table-success">
-                            <td><b>Kombinasi (Final)</b></td>
-                            <td><b>${data.final}</b></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="text-center mt-4">
-                    <div class="d-flex justify-content-center gap-3 flex-wrap">
-                        <a href="${window.location.origin}/dashboard" class="btn btn-secondary btn-lg">
-                            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+            const state = document.getElementById('results-state');
+            if (state) {
+                state.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Metode / Algoritma</th>
+                                    <th class="text-center">Skor Kemiripan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Levenshtein Distance</td>
+                                    <td class="text-center">
+                                        <span class="badge-score bg-info bg-opacity-10 text-info border border-info border-opacity-25">${data.levenshtein}%</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Content Based Filtering (TF-IDF Cosine)</td>
+                                    <td class="text-center">
+                                        <span class="badge-score bg-info bg-opacity-10 text-info border border-info border-opacity-25">${data.cbf}%</span>
+                                    </td>
+                                </tr>
+                                <tr style="background-color: #f0fdf4;">
+                                    <td style="border-left-color: var(--success); border-left-width: 4px;"><strong>Skor Akhir (Kombinasi)</strong></td>
+                                    <td class="text-center">
+                                        <span class="badge-score bg-success text-white">${data.final}%</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-5">
+                        <a href="/dashboard" id="backBtn" class="btn-action btn-secondary-outline">
+                            <i data-lucide="arrow-left" style="width: 18px;"></i>
+                            <span>Kembali ke Dashboard</span>
                         </a>
-                        <a href="${window.location.origin}/download-pdf" class="btn btn-success btn-lg">
-                            <i class="bi bi-download"></i> Download PDF Report
+                        <a href="/download-pdf" class="btn-action btn-success-solid">
+                            <i data-lucide="download" style="width: 18px;"></i>
+                            <span>Download PDF Report</span>
                         </a>
                     </div>
-                </div>
-            `;
-            
-            document.getElementById('results-state').innerHTML = resultsHtml;
-            document.getElementById('results-state').style.display = 'block';
+                `;
+                state.style.display = 'block';
+                lucide.createIcons();
+                
+                // Re-bind animasi keluar
+                const backBtn = document.getElementById('backBtn');
+                if (backBtn) {
+                    backBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const url = this.getAttribute('href');
+                        document.getElementById('mainContent').classList.add('animate-out');
+                        setTimeout(() => window.location.href = url, 500);
+                    });
+                }
+            }
+        }
+
+        // --- Animasi Keluar ---
+        const backBtn = document.getElementById('backBtn');
+        if(backBtn) {
+            backBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) mainContent.classList.add('animate-out');
+                setTimeout(() => window.location.href = url, 500);
+            });
         }
     </script>
 </body>

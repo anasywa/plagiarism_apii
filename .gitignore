@@ -1,3 +1,23 @@
 venv/*
 .gradio/
 gradio-env/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# Mac
+.DS_Store
+**/.DS_Store
+
+# User uploads
+uploads/*
+!uploads/.gitkeep
+
+# Generated files
+hasil_plagiarisme.pdf

@@ -2,7 +2,7 @@ import gradio as gr
 import os
 import re
 import io
-import fitz  # PyMuPDF
+import fitz  
 import docx
 from PIL import Image
 import pytesseract
@@ -14,14 +14,14 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
-# ========== KONFIGURASI DASAR ==========
+#KONFIGURASI DASAR
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 users = {"60200121055": "12345"}  # Contoh data login
 
 
-# ========== PEMBACAAN DOKUMEN ==========
+#PEMBACAAN DOKUMEN 
 def baca_pdf(path):
     teks = ""
     try:
@@ -62,7 +62,7 @@ def bersihkan_teks(teks):
     return teks.strip()
 
 
-# ========== SIMILARITY ==========
+#SIMILARITY
 def levenshtein_similarity(teks1, teks2):
     seq = difflib.SequenceMatcher(None, teks1, teks2)
     return seq.ratio() * 100
@@ -78,7 +78,7 @@ def cbf_similarity(teks1, teks2):
         return 0.0
 
 
-# ========== BUAT PDF HASIL ==========
+#BUAT PDF HASIL
 def buat_pdf_hasil(teks_asli, teks_uji, hasil_data, filename="hasil_plagiarisme.pdf"):
     pdf_path = os.path.join(UPLOAD_FOLDER, filename)
     styles = getSampleStyleSheet()
@@ -111,7 +111,7 @@ def buat_pdf_hasil(teks_asli, teks_uji, hasil_data, filename="hasil_plagiarisme.
     return pdf_path
 
 
-# ========== FUNGSI DETEKSI ==========
+#FUNGSI DETEKSI
 def deteksi_plagiarisme(file1, file2):
     if not file1 or not file2:
         return "❗ Harap unggah dua dokumen.", None, None, None
@@ -145,7 +145,7 @@ def deteksi_plagiarisme(file1, file2):
     return f"✅ Analisis selesai! Skor Kemiripan: {hasil['final']}%", hasil["levenshtein"], hasil["cbf"], pdf_path
 
 
-# ========== SISTEM LOGIN ==========
+#SISTEM LOGIN
 def do_login(nim, password):
     if not nim or not password:
         return (
@@ -197,7 +197,7 @@ def forgot_password(nim):
         return "❌ NIM tidak ditemukan."
 
 
-# ========== ANTARMUKA GRADIO ==========
+#ANTARMUKA GRADIO
 with gr.Blocks(title="Sistem Deteksi Plagiarisme") as demo:
     gr.Markdown("## 🔒 Login - Sistem Deteksi Plagiarisme")
 

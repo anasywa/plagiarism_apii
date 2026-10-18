@@ -1,59 +1,321 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Skripsi</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body class="bg-light">
-  <div class="container py-3 py-md-5">
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Skripsi | Professional Light Edition</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
-    <div class="row justify-content-center">
-      <div class="col-12 col-md-8 col-lg-6">
-        <div class="card shadow-lg">
-          <div class="card-body p-4">
-            <h3 class="mb-4 text-center">📤 Upload Skripsi</h3>
-            <!-- arahkan ke route hasil -->
-            <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" class="form-mobile">
-              <div class="mb-3">
-                <label for="skripsi1" class="form-label">Upload Skripsi 1</label>
-                <input type="file" name="skripsi1" id="skripsi1" accept=".pdf,.docx" class="form-control" required>
-                <div class="form-text">Format yang didukung: PDF, DOCX</div>
-              </div>
-              <div class="mb-4">
-                <label for="skripsi2" class="form-label">Upload Skripsi 2</label>
-                <input type="file" name="skripsi2" id="skripsi2" accept=".pdf,.docx" class="form-control" required>
-                <div class="form-text">Format yang didukung: PDF, DOCX</div>
-              </div>
-              <button type="submit" class="btn btn-success w-100 mb-3">
-                📤 Upload dan Analisis
-              </button>
-            </form>
-            <div class="text-center">
-              <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
-                ⬅️ Kembali ke Dashboard
-              </a>
-            </div>
-          </div>
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --success-hover: #059669;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- Animasi Partikel Daun --- */
+        #leaf-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .leaf {
+            position: absolute;
+            background-color: rgba(79, 70, 229, 0.1);
+            clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
+            animation: fly-right linear infinite;
+        }
+
+        @keyframes fly-right {
+            0% { transform: translate(-10vw, -10vh) rotate(0deg); opacity: 0; }
+            15% { opacity: 0.4; }
+            85% { opacity: 0.4; }
+            100% { transform: translate(110vw, 110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* --- Animasi Masuk & Keluar --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOutDown {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(30px); }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .animate-out {
+            animation: fadeOutDown 0.5s cubic-bezier(0.7, 0, 0.84, 0) forwards !important;
+        }
+
+        .delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .delay-3 { animation-delay: 0.3s; opacity: 0; }
+
+        /* Navbar */
+        .navbar-custom {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--text-main) !important;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Card Style */
+        .upload-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-icon {
+            width: 64px;
+            height: 64px;
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            background-color: #ffffff;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Button Styles */
+        .btn-upload {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-upload:hover {
+            background-color: var(--success-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+
+        .btn-back {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .btn-back:hover {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .alert {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Wadah Partikel Daun -->
+    <div id="leaf-container"></div>
+
+    <nav class="navbar navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i data-lucide="layers" class="text-primary"></i>
+                <span>PLAGIAT</span>
+            </a>
         </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </nav>
+
+    <main id="mainContent" class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show mb-4 animate-in" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i data-lucide="bell" class="me-2" style="width: 18px;"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
+                <div class="upload-card animate-in delay-1">
+                    <div class="header-icon">
+                        <i data-lucide="upload-cloud" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    
+                    <h3 class="text-center fw-bold mb-1">Upload Skripsi</h3>
+                    <p class="text-center text-muted small mb-4">Unggah dokumen Anda untuk proses analisis</p>
+
+                    <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+                        <div class="mb-4 animate-in delay-2">
+                            <label for="skripsi1" class="form-label">Dokumen Skripsi Utama</label>
+                            <input type="file" name="skripsi1" id="skripsi1" accept=".pdf,.docx" class="form-control" required>
+                            <div class="form-text">Maksimal ukuran file: 10MB (PDF, DOCX)</div>
+                        </div>
+
+                        <div class="mb-5 animate-in delay-3">
+                            <label for="skripsi2" class="form-label">Dokumen Pembanding / Lampiran</label>
+                            <input type="file" name="skripsi2" id="skripsi2" accept=".pdf,.docx" class="form-control" required>
+                            <div class="form-text">Gunakan file referensi atau draf sebelumnya</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-upload w-100 mb-4 d-flex align-items-center justify-content-center gap-2" id="submitBtn">
+                            <i data-lucide="zap" style="width: 18px;"></i>
+                            <span>Mulai Analisis Dokumen</span>
+                        </button>
+                    </form>
+
+                    <div class="text-center animate-in delay-3">
+                        <a href="{{ url_for('dashboard') }}" id="backBtn" class="btn btn-back">
+                            <i data-lucide="arrow-left" style="width: 18px;"></i>
+                            <span>Kembali ke Dashboard</span>
+                        </a>
+                    </div>
+                </div>
+
+                <p class="text-center mt-5 text-muted small">
+                    &copy; 2026 UIN ALAUDDIN MAKASSAR • Secure Upload System
+                </p>
+            </div>
+        </div>
+    </main>
+
+   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        
+        lucide.createIcons();
+
+       
+        const leafContainer = document.getElementById('leaf-container');
+        const leafCount = 15;
+
+        for (let i = 0; i < leafCount; i++) {
+            const leaf = document.createElement('div');
+            leaf.className = 'leaf';
+            
+            const startY = Math.random() * 100;
+            const duration = 12 + Math.random() * 18;
+            const delay = Math.random() * 20;
+            const size = 10 + Math.random() * 15;
+
+            leaf.style.left = `-5vw`;
+            leaf.style.top = `${startY}vh`;
+            leaf.style.width = `${size}px`;
+            leaf.style.height = `${size * 1.3}px`;
+            leaf.style.animationDuration = `${duration}s`;
+            leaf.style.animationDelay = `-${delay}s`;
+            
+            leafContainer.appendChild(leaf);
+        }
+
+       
+        document.getElementById('backBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetUrl = this.getAttribute('href');
+            document.getElementById('mainContent').classList.add('animate-out');
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 500);
+        });
+
+       
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                <span>Menganalisis...</span>
+            `;
+        });
+    </script>
 </body>
 </html>

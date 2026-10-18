@@ -3,20 +3,20 @@ import io
 import re
 import docx
 import difflib
-import fitz  # PyMuPDF
+import fitz  
+import Levenshtein
 from PIL import Image
 import pytesseract
 from PyPDF2 import PdfReader
 from flask import Flask, render_template, request, redirect, url_for, flash, make_response, session, send_from_directory, jsonify
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
+from reportlab.lib import colorspip freeze > requirements.txtpython -m pip freeze > requirements.txt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from reportlab.lib.pagesizes import A4
 
-# Catatan: Saya HAPUS import 'src.services.pdf_generator' dan 'Levenshtein' 
-# karena fungsi tersebut tidak disertakan atau sudah diganti dengan implementasi Anda sendiri.
+
 
 app = Flask(__name__)
 app.secret_key = "skripsi_plagiarisme_2025"
@@ -25,20 +25,21 @@ UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# =====================================
-# FUNGSI UTILITY (PEMBACAAN & PEMBERSIHAN)
-# =====================================
+
+#Fingsi Baca dan bersihkan
+
 def baca_pdf(path):
     teks = ""
     try:
-        # Menggunakan PyMuPDF (fitz) karena sudah ada dan mendukung OCR
+      
+
         doc = fitz.open(path)
         for page in doc:
             page_text = page.get_text("text")
             if not page_text.strip():
-                # Jika teks kosong, coba OCR (pastikan pytesseract terinstal dan Tesseract di path)
-                pix = page.get_pixmap()
-                img = Image.open(io.BytesIO(pix.tobytes("png")))
+               
+                pix = page.get_pixmap() 
+                img = Image.open(io.BytesIO(pix.tobytes("png"))) #Mengonversi bitmap menjadi objek gambar PIL agar bisa diproses OCR.
                 page_text = pytesseract.image_to_string(img)
             teks += page_text + " "
         doc.close()
@@ -64,20 +65,25 @@ def baca_dokumen(path):
 
 def bersihkan_teks(teks):
     teks = teks.lower()
-    # Hapus selain huruf, angka, dan spasi
+   
     teks = re.sub(r'[^a-z0-9\s]', '', teks) 
     return teks.strip()
 
 def split_sentences(teks):
-    # Memisahkan teks menjadi kalimat-kalimat berdasarkan tanda baca (.!?)
+   
     return [s.strip() for s in re.split(r'(?<=[.!?])\s+', teks) if s.strip()]
 
-# =====================================
-# FUNGSI ANALISIS PLAGIARISME
-# =====================================
+
+#Fungsi analisi plagiat
+# def levenshtein_distance_library(str1, str2):
+#     return Levenshtein.distance(str1, str2)
+
 def levenshtein_distance(str1, str2):
     len1, len2 = len(str1), len(str2)
     dp = [[0] * (len2 + 1) for _ in range(len1 + 1)]
+    # print("Matriks dp awal:")
+    # for row in dp:
+    #     print(row)
     
     for i in range(len1 + 1): dp[i][0] = i
     for j in range(len2 + 1): dp[0][j] = j
@@ -88,6 +94,7 @@ def levenshtein_distance(str1, str2):
             dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)
     return dp[len1][len2]
 
+
 def similarity_score(str1, str2):
     distance = levenshtein_distance(str1, str2)
     max_len = max(len(str1), len(str2))
@@ -95,13 +102,13 @@ def similarity_score(str1, str2):
         return 1.0
     return 1 - (distance / max_len)
 
-def levenshtein_similarity(teks1, teks2):
-    # Menggunakan SequenceMatcher untuk perbandingan tingkat dokumen (berdasarkan karakter/kata)
+def sequencematcher_similarity(teks1, teks2):
+
     seq = difflib.SequenceMatcher(None, teks1, teks2)
     return seq.ratio() * 100 
 
 def cbf_similarity(teks1, teks2):
-    # Menggunakan TF-IDF dan Cosine Similarity (CBF)
+
     vectorizer = TfidfVectorizer()
     try:
         vectors = vectorizer.fit_transform([teks1, teks2])
@@ -110,19 +117,17 @@ def cbf_similarity(teks1, teks2):
     except ValueError:
         return 0.0
 
-# =====================================
-# DATA LOGIN
-# =====================================
+
 users = {
     "60200121055": "12345"
 }
 
-# =====================================
-# ROUTE LOGIN / LOGOUT
-# =====================================
+
+#Route Login dan Logout
+
 @app.route("/", methods=["GET", "POST"])
 @app.route("/login", methods=["GET", "POST"])
-def login():
+def login(): 
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -142,9 +147,9 @@ def logout():
     flash("Anda sudah logout!", "info")
     return redirect(url_for("login"))
 
-# =====================================
-# DASHBOARD
-# =====================================
+
+#Isi Dashboard
+
 @app.route("/dashboard")
 def dashboard():
     if "user" not in session:
@@ -152,9 +157,9 @@ def dashboard():
         return redirect(url_for("login"))
     return render_template("dashboard.html", user=session["user"])
 
-# =====================================
-# UPLOAD 2 FILE
-# =====================================
+
+#upload file
+
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
     if "user" not in session:
@@ -173,22 +178,21 @@ def upload():
             flash("Format file harus PDF atau DOCX!", "danger")
             return redirect(request.url)
 
-        # Hapus file lama di session
+       
         session.pop("file1", None)
         session.pop("file2", None)
 
-        # Simpan file
+       
         filepath1 = os.path.join(app.config["UPLOAD_FOLDER"], file1.filename)
         filepath2 = os.path.join(app.config["UPLOAD_FOLDER"], file2.filename)
         
-        # Pastikan nama file unik jika perlu, atau timpa file lama.
+        
         file1.save(filepath1)
         file2.save(filepath2)
 
         session["file1"] = filepath1
         session["file2"] = filepath2
-        
-        # Clear any previous analysis results
+       
         session.pop("analysis_results", None)
         session.pop("score", None)
         session.pop("hasil", None)
@@ -198,23 +202,23 @@ def upload():
 
     return render_template("upload.html")
 
-# =====================================
-# HASIL ANALISIS & GENERATE PDF
-# =====================================
+
+#analisis 
+
 @app.route("/hasil", methods=["GET", "POST"])
 def hasil():
     if "user" not in session:
         flash("Silakan login dulu!", "warning")
         return redirect(url_for("login"))
     
-    # GET request - Show page with loading state or existing results
+  
     if request.method == "GET":
-        # Check if we already have results in session
+        
         existing_results = session.get("analysis_results")
         if existing_results:
             return render_template("hasil.html", hasil=existing_results)
         else:
-            # Check if files are uploaded
+           
             file1_path = session.get("file1")
             file2_path = session.get("file2")
             
@@ -222,10 +226,10 @@ def hasil():
                 flash("Harap upload file terlebih dahulu!", "warning")
                 return redirect(url_for("upload"))
             
-            # Show page with loading state (no results yet)
+           
             return render_template("hasil.html", hasil=None)
     
-    # POST request - Process the analysis
+    #POST request - Process the analysis
     elif request.method == "POST":
         file1_path = session.get("file1")
         file2_path = session.get("file2")
@@ -234,14 +238,14 @@ def hasil():
             return jsonify({"error": "Files not found in session"}), 400
             
         try:
-            # --- 1. Ambil Teks dari Dokumen ---
+            
             teks_asli = baca_dokumen(file1_path)
             teks_uji = baca_dokumen(file2_path)
             
             if not teks_asli or not teks_uji:
                 return jsonify({"error": "Failed to read document content"}), 400
 
-            # 2. Pengecekan Teks (PENTING)
+            
             if len(teks_asli) < 10 or len(teks_uji) < 10:
                 print(f"DEBUG: Gagal membaca file. Path 1: {file1_path}, Teks 1: {len(teks_asli)} karakter.")
                 print(f"DEBUG: Gagal membaca file. Path 2: {file2_path}, Teks 2: {len(teks_uji)} karakter.")
@@ -250,8 +254,8 @@ def hasil():
             teks_bersih_asli = bersihkan_teks(teks_asli)
             teks_bersih_uji = bersihkan_teks(teks_uji)
 
-            # --- 3. Hitung Skor ---
-            skor_levenshtein = levenshtein_similarity(teks_bersih_asli, teks_bersih_uji)
+            
+            skor_levenshtein = sequencematcher_similarity(teks_bersih_asli, teks_bersih_uji)
             skor_cbf = cbf_similarity(teks_bersih_asli, teks_bersih_uji)
             
             skor_final = (skor_levenshtein + skor_cbf) / 2
@@ -262,7 +266,7 @@ def hasil():
                 "final": round(skor_final, 2),
             }
             
-            # --- 4. Generate PDF ---
+            
             pdf_path = os.path.join(app.config["UPLOAD_FOLDER"], "hasil_plagiarisme.pdf")
             
             styles = getSampleStyleSheet()
@@ -277,7 +281,7 @@ def hasil():
             doc = SimpleDocTemplate(pdf_path, pagesize=A4)
             story = []
 
-            # Pisahkan kalimat untuk perbandingan detail
+            
             asli_sentences = split_sentences(teks_asli)
             uji_sentences = split_sentences(teks_uji)
 
@@ -290,7 +294,7 @@ def hasil():
             story.append(Paragraph("Deteksi Kalimat Mirip (Threshold 0.7 Levenshtein):", styles["Heading2"]))
             story.append(Spacer(1, 12))
 
-            # Bandingkan per kalimat (Levenshtein)
+            #bandingkan per kalimat (Levenshtein)
             detail_hasil = []
             for kalimat in uji_sentences:
                 is_plagiat = any(similarity_score(kalimat, ref) >= 0.7 for ref in asli_sentences)
@@ -298,18 +302,18 @@ def hasil():
                 story.append(Paragraph(kalimat, style))
                 story.append(Spacer(1, 6))
                 
-                # Simpan detail untuk download
+                
                 if is_plagiat:
                     detail_hasil.append(kalimat)
                     
             doc.build(story)
             
-            # --- 5. Simpan Data ke Session ---
+
             session["score"] = hasil_data["final"]
             session["hasil"] = "\n".join(detail_hasil)
-            session["analysis_results"] = hasil_data  # Cache results
+            session["analysis_results"] = hasil_data  
             
-            # Return JSON response for AJAX
+            # Return JSON 
             return jsonify(hasil_data)
             
         except Exception as e:
@@ -317,9 +321,8 @@ def hasil():
             return jsonify({"error": f"Analysis failed: {str(e)}"}), 500
 
 
-# =====================================
-# DOWNLOAD PDF
-# =====================================
+#download pdf
+
 @app.route("/download-pdf")
 def download_pdf():
     if "user" not in session:
@@ -335,15 +338,15 @@ def download_pdf():
         flash("File hasil PDF tidak ditemukan. Silakan ulangi analisis.", "danger")
         return redirect(url_for("hasil"))
 
-# =====================================
-# ROUTE SERVE UPLOADS (Opsional, jika Anda ingin menampilkan PDF langsung di browser)
-# =====================================
+
+#Route Serve Upload ( menampilkan PDF langsung di browser)
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# =====================================
-# EKSEKUSI APLIKASI
-# =====================================
+
+# Eksekusi 
+
 if __name__ == "__main__":
     app.run(debug=True)

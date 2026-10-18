@@ -1,0 +1,182 @@
+
+        :root {
+            --primary-color: #ffffff;
+            --accent-color: #6366f1;
+            --glass-white: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.25);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), 
+                        url('https://www.quipper.com/id/blog/wp-content/uploads/2017/04/0a6a8-2.3-alauddin.png') no-repeat center center fixed;
+            background-size: cover;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #leaf-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .leaf {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation: fly-right linear infinite;
+        }
+
+        @keyframes fly-right {
+            0% {
+                transform: translate(-10vw, 0vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% {
+                transform: translate(110vw, 100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            z-index: 10;
+            will-change: transform, opacity;
+        }
+
+        .card {
+                background: rgb(0 0 0 / 56%);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(28px);
+            border-radius: 40px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .brand-logo {
+            width: 75px;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -55px auto 25px;
+            border: 1px solid var(--glass-border);
+            color: white;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        h3 { color: white; letter-spacing: 1px; }
+        p.text-muted { color: rgba(255, 255, 255, 0.7) !important; }
+
+        .form-label {
+            color: white;
+            font-weight: 500;
+            font-size: 0.85rem;
+            margin-left: 5px;
+        }
+
+        .input-group {
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-control {
+            border: none;
+            padding: 14px 18px;
+            background: transparent;
+            color: white !important;
+            font-size: 0.95rem;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-control:focus {
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .input-group-text {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding-left: 18px;
+        }
+
+        .toggle-password {
+            cursor: pointer;
+            padding-right: 18px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #1e1b4b;
+            border: none;
+            border-radius: 18px;
+            padding: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.75rem;
+            margin-top: 40px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOutUp {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-40px); }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .animate-out {
+            animation: fadeOutUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
